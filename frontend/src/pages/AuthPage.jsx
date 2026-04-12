@@ -156,7 +156,7 @@ export default function AuthPage() {
               fontSize:'1.4rem', fontWeight:700, color:'#ffffff',
               marginBottom:4,
             }}>
-              KLU <span style={{color:'#ffd700'}}>EventFlow</span> Pro
+              KLU <span style={{color:'#ffd700'}}>KLU Events</span>
             </div>
             <div style={{fontSize:'0.8rem', color:'#6b7a9a'}}>
               SPARKZ 2K26 · Official Registration Portal
@@ -202,16 +202,7 @@ export default function AuthPage() {
                   placeholder="••••••••" required/>
               </div>
 
-              <div style={{
-                fontSize:'0.75rem', color:'#6b7a9a',
-                background:'rgba(255,215,0,0.06)',
-                border:'1px solid rgba(255,215,0,0.12)',
-                borderRadius:8, padding:'8px 12px', marginBottom:18,
-              }}>
-                Demo: <strong style={{color:'#ffd700'}}>admin@klu.ac.in</strong>
-                {' / '}
-                <strong style={{color:'#ffd700'}}>admin123</strong>
-              </div>
+              
 
               <button type="submit" disabled={loading} style={{
                 width:'100%', padding:'12px', border:'none', borderRadius:10,

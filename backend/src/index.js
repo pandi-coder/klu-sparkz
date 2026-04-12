@@ -75,7 +75,7 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🚀 KLU Sparkz API running on port ${PORT}`);
     console.log(`   ENV: ${process.env.NODE_ENV || 'development'}`);
     console.log(`   Health: http://localhost:${PORT}/health\n`);

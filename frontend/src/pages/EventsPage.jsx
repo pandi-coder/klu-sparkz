@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { eventsApi, registrationsApi, schoolsApi } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
@@ -6,6 +6,7 @@ import { useApp }  from '../context/AppContext';
 import { Modal, Spinner, EmptyState } from '../components/common/index.jsx';
 import CreateEventModal from '../components/Events/CreateEventModal';
 import EventDetailModal from '../components/Events/EventDetailModal';
+import PaymentModal     from '../components/Events/PaymentModal';
 
 const CAT = ['All', 'Cultural', 'Technical', 'Sports', 'Academic', 'Workshop'];
 
@@ -18,7 +19,6 @@ function EventCard({ event, myRegIds, onSelect }) {
   const registered = myRegIds.includes(event.id);
   const full       = event.registered_count >= event.max_participants;
   const dl         = daysLeft(event.deadline || event.date);
-  const isFull     = full;
   const isPast     = dl < 0;
 
   const barColor = pct(event.registered_count, event.max_participants) > 80
@@ -73,7 +73,7 @@ function EventCard({ event, myRegIds, onSelect }) {
         <div className="event-fee">{fmtCurrency(event.fee)}</div>
         {registered ? (
           <span className="badge badge-green"><i className="bi bi-check-circle" /> Registered</span>
-        ) : isFull ? (
+        ) : full ? (
           <span className="badge badge-rose">Full</span>
         ) : isPast ? (
           <span className="badge" style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--muted)' }}>Closed</span>
@@ -88,15 +88,16 @@ function EventCard({ event, myRegIds, onSelect }) {
 }
 
 export default function EventsPage() {
-  const { user, isAdmin }    = useAuth();
+  const { user, isAdmin }              = useAuth();
   const { showToast, triggerConfetti } = useApp();
   const qc = useQueryClient();
 
-  const [search,      setSearch]      = useState('');
-  const [category,    setCategory]    = useState('All');
-  const [schoolFilter, setSchoolFilter] = useState('');
+  const [search,        setSearch]        = useState('');
+  const [category,      setCategory]      = useState('All');
+  const [schoolFilter,  setSchoolFilter]  = useState('');
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [showCreate,  setShowCreate]  = useState(false);
+  const [showCreate,    setShowCreate]    = useState(false);
+  const [paymentEvent,  setPaymentEvent]  = useState(null);
 
   // ── Queries ──────────────────────────────────────────────────────────────
   const { data: eventsData, isLoading } = useQuery({
@@ -120,10 +121,10 @@ export default function EventsPage() {
     enabled:  !!user,
   });
 
-  // ── Register mutation ─────────────────────────────────────────────────────
+  // ── Free event register mutation ──────────────────────────────────────────
   const registerMut = useMutation({
     mutationFn: (eventId) => registrationsApi.create({ event_id: eventId }),
-    onSuccess: (_, eventId) => {
+    onSuccess: () => {
       qc.invalidateQueries(['my-regs']);
       qc.invalidateQueries(['events']);
       showToast('Successfully registered! 🎉', 'success');
@@ -135,9 +136,21 @@ export default function EventsPage() {
     },
   });
 
-  const events    = eventsData?.data   || [];
-  const schools   = schoolsData?.data  || [];
-  const myRegIds  = (myRegsData?.data  || []).map(r => r.event_id);
+  const events   = eventsData?.data   || [];
+  const schools  = schoolsData?.data  || [];
+  const myRegIds = (myRegsData?.data  || []).map(r => r.event_id);
+
+  // ── Handle register button click ─────────────────────────────────────────
+  const handleRegister = (event) => {
+    if (event.fee > 0) {
+      // Paid event — show Razorpay payment modal
+      setPaymentEvent(event);
+      setSelectedEvent(null);
+    } else {
+      // Free event — register directly
+      registerMut.mutate(event.id);
+    }
+  };
 
   return (
     <div className="page-enter">
@@ -184,7 +197,7 @@ export default function EventsPage() {
         )}
       </div>
 
-      {/* Grid */}
+      {/* Events Grid */}
       {isLoading ? (
         <Spinner centered />
       ) : events.length === 0 ? (
@@ -208,7 +221,7 @@ export default function EventsPage() {
           event={selectedEvent}
           isRegistered={myRegIds.includes(selectedEvent.id)}
           onClose={() => setSelectedEvent(null)}
-          onRegister={() => registerMut.mutate(selectedEvent.id)}
+          onRegister={() => handleRegister(selectedEvent)}
           registering={registerMut.isPending}
           isAdmin={isAdmin}
           onDeleted={() => {
@@ -218,7 +231,7 @@ export default function EventsPage() {
         />
       )}
 
-      {/* Create event modal (admin) */}
+      {/* Create event modal (admin only) */}
       {showCreate && (
         <CreateEventModal
           schools={schools}
@@ -227,6 +240,21 @@ export default function EventsPage() {
             qc.invalidateQueries(['events']);
             setShowCreate(false);
             showToast('Event created successfully!', 'success');
+          }}
+        />
+      )}
+
+      {/* Razorpay Payment modal */}
+      {paymentEvent && (
+        <PaymentModal
+          event={paymentEvent}
+          onClose={() => setPaymentEvent(null)}
+          onSuccess={() => {
+            setPaymentEvent(null);
+            qc.invalidateQueries(['my-regs']);
+            qc.invalidateQueries(['events']);
+            triggerConfetti();
+            showToast('Payment successful! You are registered 🎉', 'success');
           }}
         />
       )}

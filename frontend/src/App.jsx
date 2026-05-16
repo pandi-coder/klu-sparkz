@@ -7,7 +7,6 @@ import AuthPage      from './pages/AuthPage';
 import Dashboard     from './pages/Dashboard';
 import EventsPage    from './pages/EventsPage';
 import MyEventsPage  from './pages/MyEventsPage';
-import LeaderboardPage from './pages/LeaderboardPage';
 import ProfilePage   from './pages/ProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import AdminPage     from './pages/AdminPage';
@@ -68,7 +67,6 @@ export default function App() {
           <Route index                   element={<Dashboard />} />
           <Route path="events"           element={<EventsPage />} />
           <Route path="my-events"        element={<MyEventsPage />} />
-          <Route path="leaderboard"      element={<LeaderboardPage />} />
           <Route path="profile"          element={<ProfilePage />} />
           <Route path="notifications"    element={<NotificationsPage />} />
           <Route

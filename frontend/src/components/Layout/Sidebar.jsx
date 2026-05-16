@@ -12,7 +12,6 @@ const NAV = [
       { label: 'Dashboard',     icon: 'bi-speedometer2', path: '/'             },
       { label: 'Events',        icon: 'bi-calendar-event', path: '/events'     },
       { label: 'My Events',     icon: 'bi-bookmark-check', path: '/my-events'  },
-      { label: 'Leaderboard',   icon: 'bi-trophy',       path: '/leaderboard'  },
     ],
   },
   {

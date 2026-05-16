@@ -224,7 +224,6 @@ export default function Dashboard() {
               {[
                 { label: 'Browse All Events', icon: 'bi-grid', path: '/events',    color: 'var(--blue)'  },
                 { label: 'My Registrations',  icon: 'bi-bookmark-check', path: '/my-events', color: 'var(--teal)'  },
-                { label: 'Leaderboard',       icon: 'bi-trophy', path: '/leaderboard', color: 'var(--gold)'  },
                 { label: 'My Profile',        icon: 'bi-person-circle', path: '/profile', color: 'var(--rose)'  },
               ].map(({ label, icon, path, color }) => (
                 <button
